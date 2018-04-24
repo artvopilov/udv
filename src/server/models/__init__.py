@@ -1,10 +1,8 @@
-from .statusType import StatusType
 from .article import Article
 from .user import UdvUser
 from .blockOfText import BlockOfText
 from .paragraph import Paragraph
 from .source import Source
-from .sourceType import SourceType
 from .subscription import Subscription
 from .hirarchyOfArticles import HierarchyArticles
 from .photo import Photo
@@ -13,6 +11,5 @@ from .personBriefInfo import PersonBriefInfo
 from .articlePersonLink import ArticlePersonLink
 from .term import Term
 from .articleTermLink import ArticleTermLink
-from .actionType import ActionType
 from .action import Action
 from .alternativeOpinion import AlternativeOpinion

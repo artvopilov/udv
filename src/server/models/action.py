@@ -17,15 +17,13 @@ class Action(models.Model):
         (3, 'Change')
     )
 
-    Block_of_text = models.ForeignKey(BlockOfText, on_delete=models.CASCADE)
-    Moderator_src = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
-                                         related_name="moderator_source")
-    Moderator_dst = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
-                                         related_name="moderator_destination")
-    Action_Type = models.IntegerField(choices=ACTION_TYPE_CHOICES, default=1)
-    Old_version = models.TextField(null=True)
-    New_version = models.TextField(null=True)
-    Status = models.IntegerField(choices=STATUS_CHOICES, default=2)
+    block_of_text = models.ForeignKey(BlockOfText, on_delete=models.CASCADE)
+    changer = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1, related_name='changer')
+    checker = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1, related_name='checker')
+    action_Type = models.IntegerField(choices=ACTION_TYPE_CHOICES, default=1)
+    old_version = models.TextField(null=True)
+    new_version = models.TextField(null=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=2)
 
     class Meta:
         app_label = "server"

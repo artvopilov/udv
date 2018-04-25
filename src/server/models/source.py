@@ -7,12 +7,12 @@ class Source(models.Model):
         (2, 'TextBook')
     )
 
-    Char_number = models.IntegerField()
-    Title = models.CharField(max_length=50)
-    Author = models.CharField(max_length=50)
-    Link = models.TextField()
-    Date_upload = models.DateField()
-    Source_Type = models.IntegerField(choices=SOURCE_TYPE_CHOICES, default=1)
+    char_number = models.IntegerField()
+    title = models.CharField(max_length=50)
+    author = models.CharField(max_length=50)
+    link = models.TextField()
+    date_upload = models.DateField()
+    source_Type = models.IntegerField(choices=SOURCE_TYPE_CHOICES, default=1)
 
     class Meta:
         app_label = "server"

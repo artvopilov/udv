@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Photo(models.Model):
-    Link = models.TextField()
+    link = models.TextField()
 
     class Meta:
         app_label = "server"

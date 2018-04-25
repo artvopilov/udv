@@ -4,8 +4,8 @@ from .article import Article
 
 
 class Subscription(models.Model):
-    User = models.ForeignKey(UdvUser, on_delete=models.CASCADE)
-    Article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(UdvUser, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
 
     class Meta:
         app_label = "server"

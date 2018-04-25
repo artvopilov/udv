@@ -4,9 +4,9 @@ from .source import Source
 
 
 class BlockOfText(models.Model):
-    Text = models.TextField()
-    Paragraph = models.ForeignKey(Paragraph, on_delete=models.CASCADE)
-    Source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    text = models.TextField()
+    paragraph = models.ForeignKey(Paragraph, on_delete=models.CASCADE)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
 
     class Meta:
         app_label = "server"

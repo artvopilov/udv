@@ -17,15 +17,14 @@ class Action(models.Model):
         (3, 'Change')
     )
 
-    Id = models.IntegerField(unique=True, primary_key=True)
-    Block_of_text_id = models.ForeignKey(BlockOfText, on_delete=models.CASCADE)
-    Moderator_src_Id = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
+    Block_of_text = models.ForeignKey(BlockOfText, on_delete=models.CASCADE)
+    Moderator_src = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
                                          related_name="moderator_source")
-    Moderator_dst_Id = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
+    Moderator_dst = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
                                          related_name="moderator_destination")
     Action_Type = models.IntegerField(choices=ACTION_TYPE_CHOICES, default=1)
-    Old_version = models.TextField()
-    New_version = models.TextField()
+    Old_version = models.TextField(null=True)
+    New_version = models.TextField(null=True)
     Status = models.IntegerField(choices=STATUS_CHOICES, default=2)
 
     class Meta:

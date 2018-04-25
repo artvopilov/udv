@@ -3,8 +3,7 @@ from .article import Article
 
 
 class PersonBriefInfo(models.Model):
-    Id = models.IntegerField(unique=True, primary_key=True)
-    Article_id = models.ForeignKey(Article, on_delete=models.CASCADE)
+    Article = models.ForeignKey(Article, on_delete=models.CASCADE)
     First_name = models.CharField(max_length=50)
     Last_name = models.CharField(max_length=50)
     Date_of_birth = models.DateField()

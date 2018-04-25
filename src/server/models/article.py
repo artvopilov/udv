@@ -9,10 +9,10 @@ class Article(models.Model):
         (3, 'Changes required'),
     )
 
-    Id = models.IntegerField(unique=True, primary_key=True)
     Title = models.CharField(max_length=50)
-    Moderator_Id = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1)
+    Moderator = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=None, null=True)
     Status = models.IntegerField(choices=STATUS_CHOICES, default=2)
+    Parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name="children", null=True, default=None, blank=True)
 
     class Meta:
         app_label = "server"

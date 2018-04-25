@@ -7,7 +7,6 @@ class Source(models.Model):
         (2, 'TextBook')
     )
 
-    Id = models.IntegerField(unique=True, primary_key=True)
     Char_number = models.IntegerField()
     Title = models.CharField(max_length=50)
     Author = models.CharField(max_length=50)

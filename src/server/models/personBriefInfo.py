@@ -7,9 +7,9 @@ class PersonBriefInfo(models.Model):
     Article_id = models.ForeignKey(Article, on_delete=models.CASCADE)
     First_name = models.CharField(max_length=50)
     Last_name = models.CharField(max_length=50)
-    Date_of_birth = models.DateField
-    Date_of_death = models.DateField
-    Brief_info = models.TextField
+    Date_of_birth = models.DateField()
+    Date_of_death = models.DateField()
+    Brief_info = models.TextField()
 
     class Meta:
         app_label = "server"

@@ -4,7 +4,6 @@ from .blockOfText import BlockOfText
 from .paragraph import Paragraph
 from .source import Source
 from .subscription import Subscription
-from .hirarchyOfArticles import HierarchyArticles
 from .photo import Photo
 from .articlePhotoLink import ArticlePhotoLink
 from .personBriefInfo import PersonBriefInfo

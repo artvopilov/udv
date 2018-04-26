@@ -4,9 +4,8 @@ from .article import Article
 
 
 class ArticleTermLink(models.Model):
-    Id = models.IntegerField(primary_key=True, unique=True)
-    Article_Id = models.ForeignKey(Article, on_delete=models.CASCADE)
-    Term_Id = models.ForeignKey(Term, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
 
     class Meta:
         app_label = "server"

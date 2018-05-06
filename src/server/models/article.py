@@ -2,9 +2,10 @@ from django.db import models
 from .udvUser import UdvUser
 from .photo import Photo
 from .term import Term
+from .common import DbModel
 
 
-class Article(models.Model):
+class Article(DbModel):
     STATUS_CHOICES = (
         (1, 'Approved'),
         (2, 'New'),

@@ -1,7 +1,8 @@
 from django.db import models
+from .common import DbModel
 
 
-class UdvUser(models.Model):
+class UdvUser(DbModel):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     occupation = models.CharField(max_length=50)
@@ -9,18 +10,16 @@ class UdvUser(models.Model):
     moderator = models.BooleanField(default=False)
 
     @classmethod
-    def get_by_id(cls, user_id):
-        return cls.objects.get(id=user_id)
-
-    @classmethod
-    def get_all(cls):
-        return cls.objects.all()
+    def insert(cls, first_name, last_name, occupation, age, moderator):
+        udv_user = UdvUser(
+            first_name=first_name,
+            last_name=last_name,
+            occupation=occupation,
+            age=age,
+            moderator=moderator
+        )
+        UdvUser._insert(udv_user)
 
     class Meta:
         app_label = "server"
         db_table = "udv_user"
-
-
-
-
-

@@ -1,5 +1,5 @@
 from .article import Article
-from .user import UdvUser
+from .udvUser import UdvUser
 from .blockOfText import BlockOfText
 from .paragraph import Paragraph
 from .source import Source

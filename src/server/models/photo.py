@@ -6,4 +6,4 @@ class Photo(models.Model):
 
     class Meta:
         app_label = "server"
-        db_table = "Photo"
+        db_table = "photo"

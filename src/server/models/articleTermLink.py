@@ -9,4 +9,4 @@ class ArticleTermLink(models.Model):
 
     class Meta:
         app_label = "server"
-        db_table = "Article_Term_link"
+        db_table = "article_term_link"

@@ -8,6 +8,19 @@ class UdvUser(models.Model):
     age = models.IntegerField()
     moderator = models.BooleanField(default=False)
 
+    @classmethod
+    def get_by_id(cls, user_id):
+        return cls.objects.get(id=user_id)
+
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()
+
     class Meta:
         app_label = "server"
-        db_table = "User"
+        db_table = "udv_user"
+
+
+
+
+

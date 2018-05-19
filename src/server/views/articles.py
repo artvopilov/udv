@@ -1,6 +1,5 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from ..models import Article
-from .udvUsers import to_json as to_json_user
 import json
 
 
@@ -44,7 +43,6 @@ def to_json(article):
         "id": article.id,
         "title": article.title,
         "status": article.status,
-        "moderator": to_json_user(article.moderator),
     }
 
 

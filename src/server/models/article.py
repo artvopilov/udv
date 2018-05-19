@@ -27,7 +27,18 @@ class Article(DbModel):
 
     @classmethod
     def get_by_moderator_id(cls, user_id):
-        return cls.objects.get(moderator=user_id)
+        return cls.objects.get(moderator_id=user_id)
+
+    @classmethod
+    def insert(cls, creator, title, moderator, parent):
+        article = Article(
+            creator=creator,
+            title=title,
+            moderator=moderator,
+            status=2,
+            parent=parent
+        )
+        article.save()
 
     class Meta:
         app_label = "server"

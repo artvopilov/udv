@@ -10,9 +10,5 @@ class DbModel(models.Model):
     def get_by_id(cls, model_id):
         return cls.objects.get(id=model_id)
 
-    @classmethod
-    def _insert(cls, item):
-        item.save()
-
     class Meta:
         abstract = True

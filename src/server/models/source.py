@@ -12,7 +12,8 @@ class Source(models.Model):
     author = models.CharField(max_length=50)
     link = models.TextField()
     date_upload = models.DateField()
-    source_Type = models.IntegerField(choices=SOURCE_TYPE_CHOICES, default=1)
+    source_type = models.IntegerField(choices=SOURCE_TYPE_CHOICES, default=1)
 
     class Meta:
         app_label = "server"
+        db_table = "source"

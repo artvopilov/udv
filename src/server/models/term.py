@@ -7,4 +7,4 @@ class Term(models.Model):
 
     class Meta:
         app_label = "server"
-        db_table = "Term"
+        db_table = "term"

@@ -9,4 +9,4 @@ class ArticlePersonLink(models.Model):
 
     class Meta:
         app_label = "server"
-        db_table = "Article_Person_link"
+        db_table = "article_person_link"

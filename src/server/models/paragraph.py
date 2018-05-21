@@ -8,4 +8,4 @@ class Paragraph(models.Model):
 
     class Meta:
         app_label = "server"
-        db_table = "Paragraph"
+        db_table = "paragraph"

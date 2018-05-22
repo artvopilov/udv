@@ -93,6 +93,10 @@ def insert(request):
 
 
 
+def propose_change(request):
+    
+    return HttpResponse("OK")
+
 
 def to_json(article):
     return {

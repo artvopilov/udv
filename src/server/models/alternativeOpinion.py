@@ -3,7 +3,7 @@ from .paragraph import Paragraph
 
 
 class AlternativeOpinion(models.Model):
-    paragraph = models.ForeignKey(Paragraph, on_delete=models.CASCADE, default=None)
+    paragraph = models.ForeignKey(Paragraph, on_delete=models.CASCADE, default=None, related_name='opinions')
 
     class Meta:
         app_label = "server"

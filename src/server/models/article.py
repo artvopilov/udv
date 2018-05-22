@@ -14,16 +14,17 @@ class Article(DbModel):
 
     creator = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=None, null=True,
                                 related_name="articles_creator")
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
     moderator = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=None, null=True,
                                   related_name="articles_moderator")
     status = models.IntegerField(choices=STATUS_CHOICES, default=2)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name="children", null=True, default=None,
                                blank=True)
-    subscribers = models.ManyToManyField('Subscription', related_name='articles')
-    photos = models.ManyToManyField(Photo)
-    terms = models.ManyToManyField(Term)
-    persons = models.ManyToManyField('PersonBriefInfo', related_name='articles')
+
+    subscribers = models.ManyToManyField('Subscription', related_name='articles', blank=True)
+    photos = models.ManyToManyField(Photo, blank=True)
+    terms = models.ManyToManyField(Term, blank=True)
+    persons = models.ManyToManyField('PersonBriefInfo', related_name='articles', blank=True)
 
     @classmethod
     def get_by_moderator_id(cls, user_id):
@@ -39,6 +40,9 @@ class Article(DbModel):
             parent=parent
         )
         article.save()
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         app_label = "server"

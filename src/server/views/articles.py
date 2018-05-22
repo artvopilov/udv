@@ -99,7 +99,6 @@ def to_json(article):
         "id": article.id,
         "title": article.title,
         "status": article.status,
-        "moderator": to_json_user(article.moderator),
     }
 
 

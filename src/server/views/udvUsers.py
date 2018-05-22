@@ -42,7 +42,7 @@ def login_user(request):
                 login(request, user)
                 return HttpResponse("Ok")
         return HttpResponseBadRequest(reason="Auth failed")
-    return HttpResponseBadRequest(reason="Request must be POST")
+    return HttpResponseBadRequest(reason="Request must be POST",  content="Request must be POST")
 
 
 def logout_user(request):

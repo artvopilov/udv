@@ -91,7 +91,7 @@ def insert(request):
 
 
 #  принимает json вида
-# { 'paragraph_id': int, 'new_version': same paragraph as in insert }
+# { 'block_id': int, 'new_version': same block as in insert }
 def propose_change(request):
     if not request.user.is_authenticated:
         return HttpResponseBadRequest("User must be logged in")
@@ -106,8 +106,17 @@ def propose_change(request):
     if not Validator.changes(data):
         return HttpResponseBadRequest("Not all parameters provided")
 
+    try:
+        changed = BlockOfText.objects.get(id=data['block_id']) # который запрашивается на изменение
+    except BlockOfText.DoesNotExist:
+        return HttpResponseBadRequest("paragraph does not exist")
 
-    
+    blk = data['new_version']
+    source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
+                                   char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
+    block = BlockOfText.objects.create(source=source, text=blk['text'], is_main=False,
+                                       alternative_opinion=changed.alternative_opinion, number=changed.number)
+
     return HttpResponse("OK")
 
 
@@ -137,8 +146,8 @@ class Validator:
 
     @classmethod
     def changes(valid, data):
-        return valid.check_structure(data, {'paragraph_id': int, 'new_version': dict}) \
-               and valid.paragraph(data['new_version'])
+        return valid.check_structure(data, {'block_id': int, 'new_version': dict}) \
+               and valid.block(data['new_version'])
 
     @classmethod
     def article(valid, data):

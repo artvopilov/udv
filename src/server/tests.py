@@ -1,9 +1,9 @@
 from django.test import TestCase
-from .models import Article, UdvUser
+from .models import Article, UdvUser, BlockOfText, Source, AlternativeOpinion, Paragraph
 
 
 from .views.articles import Validator
-import json
+import json, datetime
 
 
 class ArticleModelTests(TestCase):
@@ -156,3 +156,29 @@ class ProposeArticleTest(TestCase):
         self.assertTrue(logged)
         resp = self.client.post('/api/articles/insert/', '{}', content_type='application/json')
         self.assertNotEqual(resp.status_code,200)
+
+
+class ProposeChangesTest(TestCase):
+    def test_propose_change(self):
+        user = UdvUser.objects.create(email='dummy@dummy.dummy')
+        user.set_password('dummy')
+        user.save()
+        self.client.login(username='dummy@dummy.dummy', password='dummy')
+
+        a = Article.objects.create()
+        p = Paragraph.objects.create(number=9, article=a)
+        o = AlternativeOpinion.objects.create(paragraph=p)
+        s = Source.objects.create(author='dummyauthor', link='dummyurl', char_number=0,
+                                  date_upload=datetime.datetime.now())
+        b = BlockOfText.objects.create(text='dummytext', number=99, source=s, alternative_opinion=o)
+        data = {'block_id': b.id, 'new_version':{
+                "text": "smarttext",
+                "source": {
+                    "author": "smartauthor",
+                    "url": "smarturl"
+                }
+        }}
+        count = BlockOfText.objects.filter(number=b.number).count()
+        resp = self.client.patch('/api/articles/change/', json.dumps(data), content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(BlockOfText.objects.filter(number=b.number).count(), count + 1)

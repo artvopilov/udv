@@ -32,6 +32,17 @@ class UdvUser(DbModel, AbstractUser):
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
+    def unsubscribe(self, article):
+        article.subscribers.remove(self)
+
+    def unsubscribe_by_id(self, article_id):
+        try:
+            article = self.articles.get(id=article_id)
+        except:
+            pass
+        else:
+            self.unsubscribe(article)
+
     class Meta:
         app_label = "server"
         db_table = "udv_user"

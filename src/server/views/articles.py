@@ -1,6 +1,5 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from ..models import Article, Paragraph, BlockOfText, AlternativeOpinion, Source, UdvUser
-from .udvUsers import to_json as to_json_user
 import json, datetime
 
 
@@ -58,11 +57,10 @@ def get_by_moderator_id(request):
 # модератором - модератор parent статьи
 #
 # пока что добавлятся будет только текст (без фоток всяких)
-# добавляет в action !!
 def insert(request):
     if not request.user.is_authenticated:
         return HttpResponseBadRequest("User must be logged in")
-    if not request.method == 'POST':
+    if request.method != 'POST':
         return HttpResponseBadRequest("Request method must be POST")
 
     try:
@@ -70,7 +68,7 @@ def insert(request):
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest("invalid json")
 
-    if not article_is_valid(data):
+    if not Validator.article(data):
         return HttpResponseBadRequest("Not all parameters provided")
 
     try:
@@ -81,17 +79,45 @@ def insert(request):
     a = Article.objects.create(creator=UdvUser.objects.get(id=request.user.id),
                 title=data['title'], parent=parent, moderator=parent.moderator)
     # TODO all source properties
-    for prgph in data['paragraphs']:
-        paragraph = Paragraph.objects.create(article=a, subtitle=prgph['subtitle'])
-        for blk in prgph['blocks']:
+    for index, prgph in enumerate(data['paragraphs']):
+        paragraph = Paragraph.objects.create(article=a, subtitle=prgph['subtitle'],number=index)
+        for blk_index, blk in enumerate(prgph['blocks']):
             opinion = AlternativeOpinion.objects.create(paragraph=paragraph)
             source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
                                            char_number=0, date_upload=datetime.datetime.now()) # TODO charnumber
-            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion)
+            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion, number=blk_index)
 
     return HttpResponse("%d" % a.id)
 
 
+#  принимает json вида
+# { 'block_id': int, 'new_version': same block as in insert }
+def propose_change(request):
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User must be logged in")
+    if request.method != 'PATCH':
+        return HttpResponseBadRequest("Request method must be PATCH")
+
+    try:
+        data = json.loads(request.body)
+    except json.decoder.JSONDecodeError:
+        return HttpResponseBadRequest("invalid json")
+
+    if not Validator.changes(data):
+        return HttpResponseBadRequest("Not all parameters provided")
+
+    try:
+        changed = BlockOfText.objects.get(id=data['block_id']) # который запрашивается на изменение
+    except BlockOfText.DoesNotExist:
+        return HttpResponseBadRequest("paragraph does not exist")
+
+    blk = data['new_version']
+    source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
+                                   char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
+    block = BlockOfText.objects.create(source=source, text=blk['text'], is_main=False,
+                                       alternative_opinion=changed.alternative_opinion, number=changed.number)
+
+    return HttpResponse("OK")
 
 
 def to_json(article):
@@ -102,31 +128,39 @@ def to_json(article):
     }
 
 
-def article_is_valid(data):
-    structure = {'parent_id' : int, 'title' : str, 'paragraphs' : list }
-    paragraph_structure = {'subtitle' : str, 'blocks' : list}
-    block_structure = {'text' : str, 'source' : dict}
-    source_structure = {'author' : str, 'url': str}
-    if not check_structure(data, structure):
-        return False
-    for par in data['paragraphs']:
-        if not check_structure(par, paragraph_structure):
-            return False
-        for block in par['blocks']:
-            if not check_structure(block, block_structure) or not check_structure(block['source'], source_structure):
-                return False
-    return True
+class Validator:
+    article_structure = {'parent_id': int, 'title': str, 'paragraphs': list}
+    paragraph_structure = {'subtitle': str, 'blocks': list}
+    block_structure = {'text': str, 'source': dict}
+    source_structure = {'author': str, 'url': str}
 
+    @classmethod
+    def block(cls, data):
+        return cls.check_structure(data, cls.block_structure)\
+               and cls.check_structure(data['source'], cls.source_structure)
 
-def check_structure(data, struct):
-    """
-    >>> s = {'hello' : 1, 'a' : {}, 'z' : []}
-    >>> check_structure(s, {'hello' : int, 'a' : dict, 'z' : list})
-    True
-    >>> check_structure(s, {'hello' : int, 'a' : dict, 'z' : str})
-    False
-    """
-    for k in struct:
-        if not isinstance(data.get(k), struct[k]):
-            return False
-    return True
+    @classmethod # valid.block is more self explaining then cls.block
+    def paragraph(valid, data):
+        return valid.check_structure(data, valid.paragraph_structure) and \
+               all(map(valid.block, data['blocks']))
+
+    @classmethod
+    def changes(valid, data):
+        return valid.check_structure(data, {'block_id': int, 'new_version': dict}) \
+               and valid.block(data['new_version'])
+
+    @classmethod
+    def article(valid, data):
+        return valid.check_structure(data, valid.article_structure) and \
+               all(map(valid.paragraph, data['paragraphs']))
+
+    @staticmethod
+    def check_structure(data, struct):
+        """
+        >>> s = {'hello' : 1, 'a' : {}, 'z' : []}
+        >>> Validator.check_structure(s, {'hello' : int, 'a' : dict, 'z' : list})
+        True
+        >>> Validator.check_structure(s, {'hello' : int, 'a' : dict, 'z' : str})
+        False
+        """
+        return all(map(lambda key: isinstance(data.get(key), struct[key]), struct))

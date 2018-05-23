@@ -8,5 +8,6 @@ from .udvUsers import (
 from .articles import (
     get_by_moderator_id as get_by_moderator_id_article,
     get_by_id as get_by_id_article,
-    insert as insert_article
+    insert as insert_article,
+    propose_change
 )

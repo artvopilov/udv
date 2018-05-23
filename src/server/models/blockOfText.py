@@ -7,6 +7,8 @@ class BlockOfText(models.Model):
     text = models.TextField()
     alternative_opinion = models.ForeignKey(AlternativeOpinion, on_delete=models.CASCADE, related_name='blocks')
     source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    number = models.IntegerField()
+    is_main = models.BooleanField(default=True)
 
     class Meta:
         app_label = "server"

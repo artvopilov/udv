@@ -116,24 +116,36 @@ def to_json(article):
 
 class Validator:
     structure = {'parent_id': int, 'title': str, 'paragraphs': list}
-    paragraph_structure = {'subtitle': str, 'blocks' : list}
-    block_structure = {'text': str, 'source' : dict}
+    paragraph_structure = {'subtitle': str, 'blocks': list}
+    block_structure = {'text': str, 'source': dict}
     source_structure = {'author': str, 'url': str}
 
     @classmethod
-    def changes_are_valid(cls, data):
-        pass
+    def block(cls, data):
+        return cls.check_structure(data, cls.block_structure)\
+               and cls.check_structure(data['source'], cls.source_structure)
+
+    @classmethod
+    def paragraph(cls, data):
+        if not cls.check_structure(data, cls.paragraph_structure):
+            return False
+        for block in data['blocks']:
+            if not cls.block(block):
+                return False
+        return True
+
+    @classmethod
+    def changes(cls, data):
+        return cls.check_structure(data, { 'paragraph_id': int, 'new_version': dict })\
+               and cls.paragraph(data['new_version'])
 
     @classmethod
     def article_is_valid(cls, data):
         if not cls.check_structure(data, cls.structure):
             return False
         for par in data['paragraphs']:
-            if not cls.check_structure(par, cls.paragraph_structure):
+            if not cls.paragraph(par):
                 return False
-            for block in par['blocks']:
-                if not cls.check_structure(block, cls.block_structure) or not cls.check_structure(block['source'], cls.source_structure):
-                    return False
         return True
 
     @staticmethod

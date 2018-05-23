@@ -24,10 +24,18 @@ class UdvUser(DbModel, AbstractUser):
             email=email,
             first_name=first_name,
             last_name=last_name,
-            moderator=False
         )
         udv_user.set_password(password)
         udv_user.save()
+
+    @classmethod
+    def make_moderator(cls, user):
+        user.is_staff = True
+        user.is_moderator = True
+        user.save()
+
+    def subscribe(self, article):
+        self.articles.add(article)
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)

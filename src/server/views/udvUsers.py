@@ -2,7 +2,7 @@ from django.http import (JsonResponse,
                          HttpResponseBadRequest,
                          HttpResponse,
                          HttpResponseRedirect)
-from ..models import UdvUser
+from ..models import UdvUser, Article
 import json
 from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.views.decorators.csrf import csrf_exempt
@@ -13,7 +13,9 @@ def get_by_id(request):
         user_id = request.GET.get('user_id')
         if user_id is None:
             return HttpResponseBadRequest("No user_id provided")
-        user = UdvUser.get_by_id(1).values()
+        user = UdvUser.get_by_id(user_id).__dict__
+        user = {key: user[key] for key in ('email', 'first_name', 'last_name', 'occupation', 'age')}
+
         return JsonResponse(user, safe=False)
 
     if request.method == "PUT":
@@ -28,6 +30,36 @@ def get_all(request):
         return JsonResponse(users, safe=False)
 
     return HttpResponseBadRequest(reason="Request method must be GET")
+
+
+def make_moderator(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        if 'candidate_id' not in data:
+            return HttpResponseBadRequest(reason="candidate_id must be provided")
+        if request.user is None or not request.user.is_super_moderator:
+            return HttpResponseBadRequest(reason="Only super moderator is able to make user moderator")
+        candidate_id = data["candidate_id"]
+        candidate = UdvUser.get_by_id(candidate_id)
+        UdvUser.make_moderator(candidate)
+        return HttpResponse("Ok")
+    return HttpResponseBadRequest(reason="Request method must be POST")
+
+
+def get_subscribed(request):
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseBadRequest(reason="User must be authenticated")
+        data = json.loads(request.body)
+        if 'article_id' not in data:
+            return HttpResponseBadRequest(reason="Article id is not provided")
+        article = Article.get_by_id(data['article_id'])
+        if article is None:
+            return HttpResponseBadRequest(reason="Article with id {} is not found".format(data['article_id']))
+        request.user.subscribe(article)
+        return HttpResponse("Ok")
+
+    return HttpResponseBadRequest(reason="Request method must be POST")
 
 
 def login_user(request):

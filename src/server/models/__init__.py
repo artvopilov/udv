@@ -3,12 +3,8 @@ from .udvUser import UdvUser
 from .blockOfText import BlockOfText
 from .paragraph import Paragraph
 from .source import Source
-from .subscription import Subscription
 from .photo import Photo
-from .articlePhotoLink import ArticlePhotoLink
 from .personBriefInfo import PersonBriefInfo
-from .articlePersonLink import ArticlePersonLink
 from .term import Term
-from .articleTermLink import ArticleTermLink
 from .action import Action
 from .alternativeOpinion import AlternativeOpinion

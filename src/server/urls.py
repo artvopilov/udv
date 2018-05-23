@@ -8,7 +8,9 @@ from .views import (
     insert_article,
     propose_change,
     login_user,
-    logout_user
+    logout_user,
+    make_moderator,
+    get_subscribed
 )
 
 
@@ -20,6 +22,8 @@ urlpatterns = [
     path('articles/by-id/', get_by_id_article),
     path('articles/insert/', insert_article),
     path('articles/change/', propose_change),
+    path('users/make-moderator', make_moderator),
+    path('users/get-subscribed', get_subscribed),
     path('login', login_user),
     path('register', register_udv_user),
     path('logout', logout_user)

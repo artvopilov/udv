@@ -95,13 +95,16 @@ def insert(request):
 def propose_change(request):
     if not request.user.is_authenticated:
         return HttpResponseBadRequest("User must be logged in")
-    if not request.method != 'PATCH':
+    if request.method != 'PATCH':
         return HttpResponseBadRequest("Request method must be PATCH")
 
     try:
         data = json.loads(request.body)
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest("invalid json")
+
+    if not Validator.changes(data):
+        return HttpResponseBadRequest("Not all parameters provided")
     
     return HttpResponse("OK")
 
@@ -115,7 +118,7 @@ def to_json(article):
 
 
 class Validator:
-    structure = {'parent_id': int, 'title': str, 'paragraphs': list}
+    article_structure = {'parent_id': int, 'title': str, 'paragraphs': list}
     paragraph_structure = {'subtitle': str, 'blocks': list}
     block_structure = {'text': str, 'source': dict}
     source_structure = {'author': str, 'url': str}
@@ -137,7 +140,7 @@ class Validator:
 
     @classmethod
     def article(valid, data):
-        return valid.check_structure(data, valid.structure) and \
+        return valid.check_structure(data, valid.article_structure) and \
                all(map(valid.paragraph, data['paragraphs']))
 
     @staticmethod

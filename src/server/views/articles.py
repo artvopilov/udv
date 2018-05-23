@@ -1,6 +1,5 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from ..models import Article, Paragraph, BlockOfText, AlternativeOpinion, Source, UdvUser
-from .udvUsers import to_json as to_json_user
 import json, datetime
 
 
@@ -58,11 +57,10 @@ def get_by_moderator_id(request):
 # модератором - модератор parent статьи
 #
 # пока что добавлятся будет только текст (без фоток всяких)
-# добавляет в action !!
 def insert(request):
     if not request.user.is_authenticated:
         return HttpResponseBadRequest("User must be logged in")
-    if not request.method == 'POST':
+    if request.method != 'POST':
         return HttpResponseBadRequest("Request method must be POST")
 
     try:
@@ -70,7 +68,7 @@ def insert(request):
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest("invalid json")
 
-    if not article_is_valid(data):
+    if not Validator.article_is_valid(data):
         return HttpResponseBadRequest("Not all parameters provided")
 
     try:
@@ -92,8 +90,18 @@ def insert(request):
     return HttpResponse("%d" % a.id)
 
 
-
+#  принимает json вида
+# { 'paragraph_id': int, 'new_version': same paragraph as in insert }
 def propose_change(request):
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User must be logged in")
+    if not request.method != 'PATCH':
+        return HttpResponseBadRequest("Request method must be PATCH")
+
+    try:
+        data = json.loads(request.body)
+    except json.decoder.JSONDecodeError:
+        return HttpResponseBadRequest("invalid json")
     
     return HttpResponse("OK")
 
@@ -106,31 +114,38 @@ def to_json(article):
     }
 
 
-def article_is_valid(data):
-    structure = {'parent_id' : int, 'title' : str, 'paragraphs' : list }
-    paragraph_structure = {'subtitle' : str, 'blocks' : list}
-    block_structure = {'text' : str, 'source' : dict}
-    source_structure = {'author' : str, 'url': str}
-    if not check_structure(data, structure):
-        return False
-    for par in data['paragraphs']:
-        if not check_structure(par, paragraph_structure):
+class Validator:
+    structure = {'parent_id': int, 'title': str, 'paragraphs': list}
+    paragraph_structure = {'subtitle': str, 'blocks' : list}
+    block_structure = {'text': str, 'source' : dict}
+    source_structure = {'author': str, 'url': str}
+
+    @classmethod
+    def changes_are_valid(cls, data):
+        pass
+
+    @classmethod
+    def article_is_valid(cls, data):
+        if not cls.check_structure(data, cls.structure):
             return False
-        for block in par['blocks']:
-            if not check_structure(block, block_structure) or not check_structure(block['source'], source_structure):
+        for par in data['paragraphs']:
+            if not cls.check_structure(par, cls.paragraph_structure):
                 return False
-    return True
+            for block in par['blocks']:
+                if not cls.check_structure(block, cls.block_structure) or not cls.check_structure(block['source'], cls.source_structure):
+                    return False
+        return True
 
-
-def check_structure(data, struct):
-    """
-    >>> s = {'hello' : 1, 'a' : {}, 'z' : []}
-    >>> check_structure(s, {'hello' : int, 'a' : dict, 'z' : list})
-    True
-    >>> check_structure(s, {'hello' : int, 'a' : dict, 'z' : str})
-    False
-    """
-    for k in struct:
-        if not isinstance(data.get(k), struct[k]):
-            return False
-    return True
+    @staticmethod
+    def check_structure(data, struct):
+        """
+        >>> s = {'hello' : 1, 'a' : {}, 'z' : []}
+        >>> Validator.check_structure(s, {'hello' : int, 'a' : dict, 'z' : list})
+        True
+        >>> Validator.check_structure(s, {'hello' : int, 'a' : dict, 'z' : str})
+        False
+        """
+        for k in struct:
+            if not isinstance(data.get(k), struct[k]):
+                return False
+        return True

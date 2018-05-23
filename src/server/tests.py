@@ -2,7 +2,7 @@ from django.test import TestCase
 from .models import Article, UdvUser
 
 
-from .views.articles import article_is_valid, check_structure
+from .views.articles import Validator
 import json
 
 
@@ -14,14 +14,14 @@ class ArticleModelTests(TestCase):
         self.assertEqual(len(a.children.all()), 0)
         self.assertEqual(a.parent, None)
         for i in range(1, 10):
-            a_child = Article(parent=a)
+            a_child = Article(parent=a,title=str(i))
             a_child.save()
             self.assertEqual(len(a.children.all()), i)
             self.assertIs(a_child.parent, a)
             self.assertEqual(len(a_child.children.all()), 0)
         self.assertEqual(a.parent, None)
         for i in range(1, 10):
-            a_child_child = Article(parent=a_child)
+            a_child_child = Article(parent=a_child, title=a_child.title+str(i))
             a_child_child.save()
             self.assertEqual(len(a_child.children.all()), i)
             self.assertIs(a_child_child.parent, a_child)
@@ -32,7 +32,7 @@ class ArticleModelTests(TestCase):
         a.save()
         child_count = 10
         for i in range(child_count):
-            a_child = Article(parent=a)
+            a_child = Article(parent=a, title=str(i))
             a_child.save()
 
         for child in a.children.all():
@@ -44,8 +44,8 @@ class ArticleModelTests(TestCase):
 class ValidationTest(TestCase):
     def test_check_structure(self):
         s = {'hello': 1, 'a': {}, 'z': []}
-        self.assertTrue(check_structure(s, {'hello': int, 'a': dict, 'z': list}))
-        self.assertFalse(check_structure(s, {'hello': int, 'a': dict, 'z': str}))
+        self.assertTrue(Validator.check_structure(s, {'hello': int, 'a': dict, 'z': list}))
+        self.assertFalse(Validator.check_structure(s, {'hello': int, 'a': dict, 'z': str}))
 
     def test_article_validation(self):
         data = {
@@ -65,21 +65,21 @@ class ValidationTest(TestCase):
             }
             ]
         }
-        self.assertTrue(article_is_valid(data))
+        self.assertTrue(Validator.article_is_valid(data))
         data['paragraphs'][0]['blocks'][0]['source']['author'] = 1
-        self.assertFalse(article_is_valid(data))
+        self.assertFalse(Validator.article_is_valid(data))
         del data['paragraphs'][0]['blocks'][0]['source']['author']
-        self.assertFalse(article_is_valid(data))
+        self.assertFalse(Validator.article_is_valid(data))
 
 
 class ProposeArticleTest(TestCase):
 
     def test_insert(self):
-        user = UdvUser.objects.create(username='dummy')
+        user = UdvUser.objects.create(email='dummy@dummy.dummy')
         user.set_password('dummy')
         user.save()
 
-        logged = self.client.login(username='dummy', password='dummy')
+        logged = self.client.login(username='dummy@dummy.dummy', password='dummy')
         self.assertTrue(logged)
 
         parent = Article.objects.create()
@@ -148,11 +148,11 @@ class ProposeArticleTest(TestCase):
                 self.assertEqual(block_posted['text'], block.text)
 
     def test_invalid_data(self):
-        user = UdvUser.objects.create(username='dummy')
+        user = UdvUser.objects.create(email='dummy@dummy.dummy')
         user.set_password('dummy')
         user.save()
 
-        logged = self.client.login(username='dummy', password='dummy')
+        logged = self.client.login(username='dummy@dummy.dummy', password='dummy')
         self.assertTrue(logged)
         resp = self.client.post('/api/articles/insert/', '{}', content_type='application/json')
         self.assertNotEqual(resp.status_code,200)

@@ -68,7 +68,7 @@ def insert(request):
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest("invalid json")
 
-    if not Validator.article_is_valid(data):
+    if not Validator.article(data):
         return HttpResponseBadRequest("Not all parameters provided")
 
     try:
@@ -125,28 +125,20 @@ class Validator:
         return cls.check_structure(data, cls.block_structure)\
                and cls.check_structure(data['source'], cls.source_structure)
 
-    @classmethod
-    def paragraph(cls, data):
-        if not cls.check_structure(data, cls.paragraph_structure):
-            return False
-        for block in data['blocks']:
-            if not cls.block(block):
-                return False
-        return True
+    @classmethod # valid.block is more self explaining then cls.block
+    def paragraph(valid, data):
+        return valid.check_structure(data, valid.paragraph_structure) and \
+               all(map(valid.block, data['blocks']))
 
     @classmethod
-    def changes(cls, data):
-        return cls.check_structure(data, { 'paragraph_id': int, 'new_version': dict })\
-               and cls.paragraph(data['new_version'])
+    def changes(valid, data):
+        return valid.check_structure(data, {'paragraph_id': int, 'new_version': dict}) \
+               and valid.paragraph(data['new_version'])
 
     @classmethod
-    def article_is_valid(cls, data):
-        if not cls.check_structure(data, cls.structure):
-            return False
-        for par in data['paragraphs']:
-            if not cls.paragraph(par):
-                return False
-        return True
+    def article(valid, data):
+        return valid.check_structure(data, valid.structure) and \
+               all(map(valid.paragraph, data['paragraphs']))
 
     @staticmethod
     def check_structure(data, struct):
@@ -157,7 +149,4 @@ class Validator:
         >>> Validator.check_structure(s, {'hello' : int, 'a' : dict, 'z' : str})
         False
         """
-        for k in struct:
-            if not isinstance(data.get(k), struct[k]):
-                return False
-        return True
+        return all(map(lambda key: isinstance(data.get(key), struct[key]), struct))

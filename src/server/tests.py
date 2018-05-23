@@ -65,11 +65,11 @@ class ValidationTest(TestCase):
             }
             ]
         }
-        self.assertTrue(Validator.article_is_valid(data))
+        self.assertTrue(Validator.article(data))
         data['paragraphs'][0]['blocks'][0]['source']['author'] = 1
-        self.assertFalse(Validator.article_is_valid(data))
+        self.assertFalse(Validator.article(data))
         del data['paragraphs'][0]['blocks'][0]['source']['author']
-        self.assertFalse(Validator.article_is_valid(data))
+        self.assertFalse(Validator.article(data))
 
 
 class ProposeArticleTest(TestCase):

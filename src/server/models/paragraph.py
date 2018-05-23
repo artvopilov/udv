@@ -5,6 +5,7 @@ from .article import Article
 class Paragraph(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='paragraphs')
     subtitle = models.CharField(max_length=50)
+    number = models.IntegerField()
 
     class Meta:
         app_label = "server"

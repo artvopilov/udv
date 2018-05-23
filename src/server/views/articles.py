@@ -79,13 +79,13 @@ def insert(request):
     a = Article.objects.create(creator=UdvUser.objects.get(id=request.user.id),
                 title=data['title'], parent=parent, moderator=parent.moderator)
     # TODO all source properties
-    for prgph in data['paragraphs']:
-        paragraph = Paragraph.objects.create(article=a, subtitle=prgph['subtitle'])
-        for blk in prgph['blocks']:
+    for index, prgph in enumerate(data['paragraphs']):
+        paragraph = Paragraph.objects.create(article=a, subtitle=prgph['subtitle'],number=index)
+        for blk_index, blk in enumerate(prgph['blocks']):
             opinion = AlternativeOpinion.objects.create(paragraph=paragraph)
             source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
                                            char_number=0, date_upload=datetime.datetime.now()) # TODO charnumber
-            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion)
+            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion, number=blk_index)
 
     return HttpResponse("%d" % a.id)
 
@@ -105,6 +105,8 @@ def propose_change(request):
 
     if not Validator.changes(data):
         return HttpResponseBadRequest("Not all parameters provided")
+
+
     
     return HttpResponse("OK")
 

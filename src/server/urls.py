@@ -20,8 +20,6 @@ urlpatterns = [
     path('articles/by-id/', get_by_id_article),
     path('articles/insert/', insert_article),
     path('articles/change/', propose_change),
-    path('login/', login_user),
-    path('register/', register_udv_user),
     path('login', login_user),
     path('register', register_udv_user),
     path('logout', logout_user)

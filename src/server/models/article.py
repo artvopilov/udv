@@ -21,7 +21,7 @@ class Article(DbModel):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name="children", null=True, default=None,
                                blank=True)
 
-    subscribers = models.ManyToManyField('Subscription', related_name='articles', blank=True)
+    subscribers = models.ManyToManyField(UdvUser, related_name='articles', blank=True)
     photos = models.ManyToManyField(Photo, blank=True)
     terms = models.ManyToManyField(Term, blank=True)
     persons = models.ManyToManyField('PersonBriefInfo', related_name='articles', blank=True)

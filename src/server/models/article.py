@@ -43,6 +43,7 @@ class Article(DbModel):
             parent=parent
         )
         article.save()
+        return article
 
     def __str__(self):
         return self.title

@@ -46,17 +46,17 @@ def propose_new_article(request):
     except Article.DoesNotExist:
         return HttpResponseBadRequest("parent does not exist")
 
-    a = Article.objects.create(creator=UdvUser.objects.get(id=request.user.id),
-                               title=data['title'], parent=parent, moderator=parent.moderator)
+    a = Article.insert(creator=UdvUser.objects.get(id=request.user.id),
+                       title=data['title'], parent=parent, moderator=parent.moderator)
     # TODO all source properties
     for index, paragraph_json in enumerate(data['paragraphs']):
-        paragraph = Paragraph.objects.create(article=a, subtitle=paragraph_json['subtitle'], number=index)
+        paragraph = Paragraph.insert(article=a, subtitle=paragraph_json['subtitle'], number=index)
         for blk_index, blk in enumerate(paragraph_json['blocks']):
             opinion = AlternativeOpinion.objects.create(paragraph=paragraph)
-            source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
-                                           char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
-            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion,
-                                               number=blk_index)
+            source = Source.insert(link=blk['source']['url'], author=blk['source']['author'],
+                                   char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
+            block = BlockOfText.insert(source=source, text=blk['text'], alternative_opinion=opinion,
+                                       number=blk_index)
 
     return HttpResponse("%d" % a.id)
 

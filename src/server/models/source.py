@@ -14,6 +14,17 @@ class Source(models.Model):
     date_upload = models.DateField()
     source_type = models.IntegerField(choices=SOURCE_TYPE_CHOICES, default=1)
 
+    @classmethod
+    def insert(cls, link, author, char_number, date_upload):
+        source = Source(
+            link=link,
+            author=author,
+            char_number=char_number,
+            date_upload=date_upload
+        )
+        source.save()
+        return source
+
     class Meta:
         app_label = "server"
         db_table = "source"

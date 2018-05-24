@@ -10,6 +10,17 @@ class BlockOfText(models.Model):
     number = models.IntegerField()
     is_main = models.BooleanField(default=True)
 
+    @classmethod
+    def insert(cls, source, text, alternative_opinion, number):
+        block_of_text = BlockOfText(
+            source=source,
+            text=text,
+            alternative_opinion=alternative_opinion,
+            number=number
+        )
+        block_of_text.save()
+        return block_of_text
+
     class Meta:
         app_label = "server"
         db_table = "block_of_text"

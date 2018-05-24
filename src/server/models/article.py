@@ -6,10 +6,13 @@ from .common import DbModel
 
 
 class Article(DbModel):
+    APPROVED = 1
+    NEW = 2
+    CHANGED = 3
     STATUS_CHOICES = (
-        (1, 'Approved'),
-        (2, 'New'),
-        (3, 'Changes required'),
+        (APPROVED, 'Approved'),
+        (NEW, 'New'),
+        (CHANGED, 'Changes required'),
     )
 
     creator = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=None, null=True,
@@ -17,7 +20,7 @@ class Article(DbModel):
     title = models.CharField(max_length=50, unique=True)
     moderator = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=None, null=True,
                                   related_name="articles_moderator")
-    status = models.IntegerField(choices=STATUS_CHOICES, default=2)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=NEW)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name="children", null=True, default=None,
                                blank=True)
 

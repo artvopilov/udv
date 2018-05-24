@@ -5,6 +5,7 @@ from django.http import (JsonResponse,
 from ..models import UdvUser, Article
 import json
 from django.contrib.auth import authenticate, login, get_user_model, logout
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -64,7 +65,10 @@ def get_subscribed(request):
 
 def login_user(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest("invalid json")
         email = data["email"]
         password = data["password"]
         user = authenticate(username=email, password=password)

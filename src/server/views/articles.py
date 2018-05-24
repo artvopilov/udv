@@ -1,4 +1,5 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+from django.contrib.auth.decorators import login_required
 from ..models import Article, Paragraph, BlockOfText, AlternativeOpinion, Source, UdvUser
 import json, datetime
 
@@ -57,9 +58,8 @@ def get_by_moderator_id(request):
 # модератором - модератор parent статьи
 #
 # пока что добавлятся будет только текст (без фоток всяких)
-def insert(request):
-    if not request.user.is_authenticated:
-        return HttpResponseBadRequest("User must be logged in")
+@login_required
+def propose_new_article(request):
     if request.method != 'POST':
         return HttpResponseBadRequest("Request method must be POST")
 
@@ -92,9 +92,8 @@ def insert(request):
 
 #  принимает json вида
 # { 'block_id': int, 'new_version': same block as in insert }
+@login_required
 def propose_change(request):
-    if not request.user.is_authenticated:
-        return HttpResponseBadRequest("User must be logged in")
     if request.method != 'PATCH':
         return HttpResponseBadRequest("Request method must be PATCH")
 
@@ -116,6 +115,7 @@ def propose_change(request):
                                    char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
     block = BlockOfText.objects.create(source=source, text=blk['text'], is_main=False,
                                        alternative_opinion=changed.alternative_opinion, number=changed.number)
+    changed.alternative_opinion.paragraph.article.status = Article.CHANGED
 
     return HttpResponse("OK")
 

@@ -57,7 +57,7 @@ def propose_new_article(request):
                                            char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
             block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion,
                                                number=blk_index)
-            Action.objects.create(changer=request.user, moderator_checker=parent.moderator, new=block)
+            Action.insert(changer=request.user, moderator_checker=parent.moderator, new=block)
 
     return HttpResponse("%d" % a.id)
 

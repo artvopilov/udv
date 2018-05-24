@@ -25,6 +25,10 @@ class Action(models.Model):
     action_type = models.IntegerField(choices=ACTION_TYPE_CHOICES, default=1)
     status = models.IntegerField(choices=STATUS_CHOICES, default=2)
 
+    @classmethod
+    def insert(cls, old, new, changer, moderator_checker):
+        cls.objects.create(old=old, new=new, changer=changer, moderator_checker=moderator_checker)
+
     class Meta:
         app_label = "server"
         db_table = "action"

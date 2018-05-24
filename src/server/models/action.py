@@ -27,7 +27,7 @@ class Action(models.Model):
 
     @classmethod
     def insert(cls, old, new, changer, moderator_checker):
-        cls.objects.create(old=old, new=new, changer=changer, moderator_checker=moderator_checker)
+        return cls.objects.create(old=old, new=new, changer=changer, moderator_checker=moderator_checker)
 
     class Meta:
         app_label = "server"

@@ -5,6 +5,7 @@ from django.http import (JsonResponse,
 from ..models import UdvUser
 import json
 from django.contrib.auth import authenticate, login, get_user_model, logout
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 

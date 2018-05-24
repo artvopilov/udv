@@ -32,7 +32,10 @@ def get_all(request):
 
 def login_user(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest("invalid json")
         email = data["email"]
         password = data["password"]
         user = authenticate(username=email, password=password)

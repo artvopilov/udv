@@ -57,8 +57,7 @@ def propose_new_article(request):
                                            char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
             block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion,
                                                number=blk_index)
-            Action.objects.create(block_of_text=block, changer=request.user, moderator_checker=parent.moderator,
-                                  new_version=block.text) # TODO мб сучше сделать, чтобы хранилась ссылка на старый блок текста
+            Action.objects.create(changer=request.user, moderator_checker=parent.moderator, new=block)
 
     return HttpResponse("%d" % a.id)
 
@@ -89,8 +88,7 @@ def propose_change(request):
     article = changed.alternative_opinion.paragraph.article
     article.status = Article.CHANGED
     article.save()
-    Action.objects.create(block_of_text=block, changer=request.user, moderator_checker=article.moderator,
-                          old_version=changed.text, new_version=block.text)# TODO мб сучше сделать, чтобы хранилась ссылка на старый блок текста
+    Action.objects.create(changer=request.user, moderator_checker=article.moderator, old=changed, new=block)
 
     return HttpResponse("OK")
 

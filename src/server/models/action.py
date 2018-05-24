@@ -16,14 +16,13 @@ class Action(models.Model):
         (2, 'Delete'),
         (3, 'Change')
     )
+    old = models.OneToOneField(BlockOfText, on_delete=models.CASCADE, related_name='action_old', null=True)
+    new = models.OneToOneField(BlockOfText, on_delete=models.CASCADE, related_name='action_new')
 
-    block_of_text = models.ForeignKey(BlockOfText, on_delete=models.CASCADE)
     changer = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1, related_name='changer')
     moderator_checker = models.ForeignKey(UdvUser, on_delete=models.SET_DEFAULT, default=1,
-                                          related_name='moderator_checker')
+                                          related_name='actions', null=True)
     action_type = models.IntegerField(choices=ACTION_TYPE_CHOICES, default=1)
-    old_version = models.TextField(null=True)
-    new_version = models.TextField(null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=2)
 
     class Meta:

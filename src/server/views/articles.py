@@ -27,42 +27,12 @@ def get_by_moderator_id(request):
 
     return HttpResponseBadRequest("Request method must be GET")
 
-# в реквесте будет json, вида
-# {
-#   "parent_id" : int,
-#   "title" : str,
-#   "paragraphs" : [
-#       {
-#           "subtitle" : str,
-#           "blocks" : [
-#               {
-#                   "text" : "x",
-#                   "source" : {
-#                       "author": "",
-#                       "url": "",
-#                   },
-#               },
-#               {...},
-#               {...},
-#               {...},
-#               ...
-#           ]
-#       },
-#       {...},
-#       {...},
-#       {...},
-#       ...
-#   ]
-# }
-# создателем будет отправивший юзер
-# модератором - модератор parent статьи
-#
-# пока что добавлятся будет только текст (без фоток всяких)
-@login_required
+
 def propose_new_article(request):
     if request.method != 'POST':
         return HttpResponseBadRequest("Request method must be POST")
-
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User must be authenticated")
     try:
         data = json.loads(request.body)
     except json.decoder.JSONDecodeError:
@@ -72,31 +42,30 @@ def propose_new_article(request):
         return HttpResponseBadRequest("Not all parameters provided")
 
     try:
-        parent = Article.objects.get(id=data['parent_id'])
+        parent = Article.get_by_id(data['parent_id'])
     except Article.DoesNotExist:
         return HttpResponseBadRequest("parent does not exist")
 
     a = Article.objects.create(creator=UdvUser.objects.get(id=request.user.id),
-                title=data['title'], parent=parent, moderator=parent.moderator)
+                               title=data['title'], parent=parent, moderator=parent.moderator)
     # TODO all source properties
-    for index, prgph in enumerate(data['paragraphs']):
-        paragraph = Paragraph.objects.create(article=a, subtitle=prgph['subtitle'],number=index)
-        for blk_index, blk in enumerate(prgph['blocks']):
+    for index, paragraph_json in enumerate(data['paragraphs']):
+        paragraph = Paragraph.objects.create(article=a, subtitle=paragraph_json['subtitle'], number=index)
+        for blk_index, blk in enumerate(paragraph_json['blocks']):
             opinion = AlternativeOpinion.objects.create(paragraph=paragraph)
             source = Source.objects.create(link=blk['source']['url'], author=blk['source']['author'],
-                                           char_number=0, date_upload=datetime.datetime.now()) # TODO charnumber
-            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion, number=blk_index)
+                                           char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
+            block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion,
+                                               number=blk_index)
 
     return HttpResponse("%d" % a.id)
 
 
-#  принимает json вида
-# { 'block_id': int, 'new_version': same block as in insert }
-@login_required
 def propose_change(request):
     if request.method != 'PATCH':
         return HttpResponseBadRequest("Request method must be PATCH")
-
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User must be authenticated")
     try:
         data = json.loads(request.body)
     except json.decoder.JSONDecodeError:
@@ -106,7 +75,7 @@ def propose_change(request):
         return HttpResponseBadRequest("Not all parameters provided")
 
     try:
-        changed = BlockOfText.objects.get(id=data['block_id']) # который запрашивается на изменение
+        changed = BlockOfText.objects.get(id=data['block_id'])  # который запрашивается на изменение
     except BlockOfText.DoesNotExist:
         return HttpResponseBadRequest("paragraph does not exist")
 
@@ -136,10 +105,10 @@ class Validator:
 
     @classmethod
     def block(cls, data):
-        return cls.check_structure(data, cls.block_structure)\
+        return cls.check_structure(data, cls.block_structure) \
                and cls.check_structure(data['source'], cls.source_structure)
 
-    @classmethod # valid.block is more self explaining then cls.block
+    @classmethod  # valid.block is more self explaining then cls.block
     def paragraph(valid, data):
         return valid.check_structure(data, valid.paragraph_structure) and \
                all(map(valid.block, data['blocks']))

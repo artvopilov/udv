@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
-from ..models import Article, Paragraph, BlockOfText, AlternativeOpinion, Source, UdvUser
+from ..models import Article, Paragraph, BlockOfText, AlternativeOpinion, Source, UdvUser, Action
 import json, datetime
 
 
@@ -57,6 +57,7 @@ def propose_new_article(request):
                                            char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
             block = BlockOfText.objects.create(source=source, text=blk['text'], alternative_opinion=opinion,
                                                number=blk_index)
+            Action.insert(changer=request.user, moderator_checker=parent.moderator, new=block)
 
     return HttpResponse("%d" % a.id)
 
@@ -84,7 +85,10 @@ def propose_change(request):
                                    char_number=0, date_upload=datetime.datetime.now())  # TODO charnumber
     block = BlockOfText.objects.create(source=source, text=blk['text'], is_main=False,
                                        alternative_opinion=changed.alternative_opinion, number=changed.number)
-    changed.alternative_opinion.paragraph.article.status = Article.CHANGED
+    article = changed.alternative_opinion.paragraph.article
+    article.status = Article.CHANGED
+    article.save()
+    Action.objects.create(changer=request.user, moderator_checker=article.moderator, old=changed, new=block)
 
     return HttpResponse("OK")
 

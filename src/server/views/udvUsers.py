@@ -54,8 +54,9 @@ def get_subscribed(request):
         data = json.loads(request.body)
         if 'article_id' not in data:
             return HttpResponseBadRequest(reason="Article id is not provided")
-        article = Article.get_by_id(data['article_id'])
-        if article is None:
+        try:
+            article = Article.get_by_id(data['article_id'])
+        except Article.DoesNotExist:
             return HttpResponseBadRequest(reason="Article with id {} is not found".format(data['article_id']))
         request.user.subscribe(article)
         return HttpResponse("Ok")

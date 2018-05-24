@@ -59,7 +59,7 @@ def get_by_moderator_id(request):
 #
 # пока что добавлятся будет только текст (без фоток всяких)
 @login_required
-def insert(request):
+def propose_new_article(request):
     if request.method != 'POST':
         return HttpResponseBadRequest("Request method must be POST")
 
